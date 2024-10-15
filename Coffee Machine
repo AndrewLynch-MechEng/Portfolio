@@ -1,0 +1,171 @@
+MENU = {
+    "espresso": {
+        "ingredients": {
+            "water": 50,
+            "milk": 0,
+            "coffee": 18,
+        },
+        "cost": 1.5,
+    },
+    "latte": {
+        "ingredients": {
+            "water": 200,
+            "milk": 150,
+            "coffee": 24,
+        },
+        "cost": 2.5,
+    },
+    "cappuccino": {
+        "ingredients": {
+            "water": 250,
+            "milk": 100,
+            "coffee": 24,
+        },
+        "cost": 3.0,
+    }
+}
+
+resources = {
+    "water": 300,
+    "milk": 200,
+    "coffee": 100,
+    "money": 0.00,
+}
+
+
+def report():
+    """Return the amount of each resource currently in the machine"""
+    print(
+        f"Resources remaining:\n"
+        f"Water: {resources['water']}ml\n"
+        f"Milk: {resources['milk']}ml\n"
+        f"Coffee: {resources['coffee']}g\n"
+        f"Money: ${resources['money']}\n"
+    )
+
+
+def refill():
+    """Refill resources to max quantities"""
+    resources['water'] = 300
+    resources['milk'] = 200
+    resources['coffee'] = 100
+    print("Resources have been refilled.")
+
+
+def collection():
+    """Collect money from coffe machine"""
+    print(f"You have collected ${resources['money']} from the coffee machine.")
+    resources['money'] = 0.00
+
+
+def check_resources():
+    """Check to see if there are enough resources for the chosen drink against resources available"""
+    if resources['water'] < MENU[choice]['ingredients']['water']:
+        print("Sorry there is not enough water.")
+    elif resources['milk'] < MENU[choice]['ingredients']['milk']:
+        print("Sorry there is not enough milk.")
+    elif resources['coffee'] < MENU[choice]['ingredients']['coffee']:
+        print("Sorry there is not enough coffee.")
+    else:
+        result = True
+        return result
+
+
+def process_coins():
+    """Accept coins and totals the amount paid"""
+    print("Please insert coins:")
+    print("Must input '0' if no coins of that type are inserted")
+    q_insert = int(input("quantity of quarters ($0.25): "))
+    d_insert = int(input("quantity of dimes ($0.10): "))
+    n_insert = int(input("quantity of nickels ($0.05): "))
+    p_insert = int(input("quantity of pennies ($0.01): "))
+    q_value = float(q_insert * .25)
+    d_value = float(d_insert * .1)
+    n_value = float(n_insert * .05)
+    p_value = float(p_insert * .01)
+    global total_inserted
+    total_inserted = q_value + d_value + n_value + p_value
+    print(f"You have paid: ${total_inserted}")
+
+
+def transaction_successful():
+    """Verify the customer paid enough for their selection and give refund if needed"""
+    if total_inserted < MENU[choice]['cost']:
+        print("Sorry that's not enough money. Money refunded")
+        print("\n" * 2)
+    else:
+        refund = total_inserted - MENU[choice]['cost']
+        kept = total_inserted - refund
+        resources['money'] += kept
+        print(f"Your change is ${refund:.2f}")
+        if refund >= 0.00:
+            result = True
+            return result
+
+
+def use_resources():
+    """Deduct the resources used to make the customer's order"""
+    resources['water'] = resources['water'] - MENU[choice]['ingredients']['water']
+    resources['milk'] = resources['milk'] - MENU[choice]['ingredients']['milk']
+    resources['coffee'] = resources['coffee'] - MENU[choice]['ingredients']['coffee']
+
+
+def completed_order():
+    """Presents ordered drink"""
+    print(f"Here is your {choice}. Enjoy!")
+    print("\n" * 2)
+
+
+machine_on = True
+while machine_on:
+
+    choice = input("What would you like? (espresso-$1.50/latte-$2.5/cappuccino-$3.00): ").lower()
+
+    if choice == "off":
+        print("Coffe machine powering off. Goodbye.")
+        machine_on = False
+
+    elif choice == "report":
+        report()
+
+    elif choice == "refill":
+        refill()
+
+    elif choice == "collection":
+        collection()
+
+    elif choice == "espresso":
+        check_resources()
+        if check_resources():
+            print("All resources are available.")
+            total_inserted = 0.00
+            process_coins()
+            if transaction_successful():
+                print("Payment Successful!")
+                use_resources()
+                completed_order()
+
+    elif choice == "latte":
+        check_resources()
+        if check_resources():
+            print("All resources are available.")
+            total_inserted = 0.00
+            process_coins()
+            if transaction_successful():
+                print("Payment Successful!")
+                use_resources()
+                completed_order()
+
+    elif choice == "cappuccino":
+        check_resources()
+        if check_resources():
+            print("All resources are available.")
+            total_inserted = 0.00
+            process_coins()
+            if transaction_successful():
+                print("Payment Successful!")
+                use_resources()
+                completed_order()
+
+    else:
+        print("Invalid input. Please try again.")

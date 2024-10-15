@@ -1,4 +1,4 @@
-# Shape Detection Machine Vision Project By: Lynch_Andrew
+# Shape Detection Machine Vision Project in Python By: Lynch_Andrew
 # This code was developed to detect basic shapes (square and circle) 
   # as well as basic colors (black and white) to sort them into a dictionary. 
 # The dictionary will store the quantities of each category and print the dictionary as a report when requested.

@@ -1,0 +1,152 @@
+# Shape Detection Machine Vision Project By: Lynch_Andrew
+# This code was developed to detect basic shapes (square and circle) 
+  # as well as basic colors (black and white) to sort them into a dictionary. 
+# The dictionary will store the quantities of each category and print the dictionary as a report when requested.
+# If I were to expand upon this project now:
+    # I would add an ANSI art table to show the data in a more appealing format
+
+
+import sensor, image, time, tf, math, pyb, machine
+from pyb import RTC
+
+
+# Color Threshholds: Black then White
+thresholds = [(0,105),(255,175)]
+img_num = 0
+size = "None"
+
+
+# Create dictionary to log counts
+counts = {
+'Square - Black - Large' :0,
+'Square - White - Large' :0,
+'Square - Black - Small' :0,
+'Square - White - Small' :0,
+'Triangle - Black - Large' :0,
+'Triangle - White - Large' :0,
+'Triangle - Black - Small' :0,
+'Triangle - White - Small' :0,
+'Circle - Black - Large' :0,
+'Circle - White - Large' :0,
+'Unknown - Black - Unknown' :0,
+'Unknown - White - Unknown' :0,
+'Unknown - Unknown - Unknown' :0,
+'NA - NA - NA' :0
+}
+
+
+# Set button to control camera
+ctrl_button = pyb.Pin('P0', pyb.Pin.OUT_OD, pyb.Pin.PULL_UP)
+
+
+# Set button actions
+def buttonpress():
+
+# define global variables
+    global size, color, shape, img_num
+
+# Control variable
+    control=0
+
+# On button press, start timer to log how long botton was pressed for
+    while ctrl_button.value():
+        if control==0:
+           control=1
+           start_ctrl=pyb.millis()
+           pyb.delay(2000)
+
+# On button release, calculate time button was held
+    if control:
+       hold_time=pyb.millis()-start_ctrl
+       print(hold_time)
+
+# If button was held < 3 sec, count and record data
+       if hold_time < 3000:
+            img_num += 1
+            pyb.delay(100)
+            print(f"Part_#{img_num}")
+            captured_shape=[shape, color, size]
+            counts[shape + ' - ' + color + ' - ' + size] +=1
+            print(captured_shape)
+
+
+# If button held for > 4 sec, show count dictionary before resetting board to clean memory
+       if hold_time > 4000:
+          print(f"Run Complete. Finished count avalible:")
+          for shape, count in sorted(counts.items()):
+               if count > 0:
+                   print(count, " - ", shape)
+                   pyb.delay(2000)
+                   machine.reset()
+
+
+# Camera settings
+sensor.reset()
+sensor.set_pixformat(sensor.GRAYSCALE)
+sensor.set_framesize(sensor.VGA)
+sensor.set_windowing(150,50,300,300)
+sensor.skip_frames(time = 2000)
+
+
+# Camera view
+while(True):
+    img = sensor.snapshot()
+
+
+# Find blob in camera view
+    for blob in img.find_blobs(thresholds, pixel_threshold=100, area_threshold=100, merge=True):
+
+# Used to find numbers for blob detection
+##        print(blob.code(), blob.pixels(), blob.density())
+
+
+# Check blob color againt set thresholds
+        if blob.code()==1:
+            color="Black"
+
+        elif blob.code()==2:
+            color="White"
+
+        elif blob.code()==3:
+            color="Black"
+
+        else:
+            color="Unknown"
+
+
+# Using number of pixels to determin size and shape
+        if blob.pixels()> 85000:
+            shape="Square"
+            size="Large"
+
+        elif blob.pixels()> 34000:
+            shape="Triangle"
+            size="Large"
+
+        elif blob.pixels()> 30000:
+            shape="Circle"
+            size="Large"
+
+        elif blob.pixels()> 10000:
+            shape="Square"
+            size="Small"
+
+        elif blob.pixels()> 6000:
+            shape="Triangle"
+            size="Small"
+
+        elif blob.pixels() > 0:
+            shape="NA"
+            size="NA"
+            color="NA"
+
+        else:
+            shape="Unknown"
+            size="Unknown"
+
+
+# Activate button press functions with part in view
+    buttonpress()
+
+# Activate button press function with no part in view
+buttonpress()

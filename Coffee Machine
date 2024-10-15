@@ -1,4 +1,4 @@
-# Coffe Machine project done for online coding course
+# Coffe Machine project done for online Python coding course
 
 MENU = {
     "espresso": {
